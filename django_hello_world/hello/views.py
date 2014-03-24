@@ -1,8 +1,18 @@
+from django.contrib import messages
 from annoying.decorators import render_to
-from django.contrib.auth.models import User
+from .models import MyData
 
 
 @render_to('hello/home.html')
 def home(request):
-    users = User.objects.filter()
-    return {'users': users}
+    context = {}
+
+    try:
+        mydata = MyData.objects.get(id=1)
+    except MyData.DoesNotExist:
+        messages.error(request, "Run syncdb first")
+        return {}
+
+    context['profile'] = mydata
+    context['contacts'] = mydata.contacts_set.all()
+    return context
