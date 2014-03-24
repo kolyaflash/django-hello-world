@@ -40,3 +40,5 @@ class CommonTest(TestCase):
         profile = response.context['profile']
         self.assertTrue(isinstance(profile, MyData))
         self.assertContains(response, profile.first_name)
+        self.assertContains(response,
+            profile.contacts_set.get(contact_type='email').value)
