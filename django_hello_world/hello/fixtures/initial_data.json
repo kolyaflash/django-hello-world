@@ -26,7 +26,26 @@
             "last_name": "Baluk",
             "birth_date": "2011-08-19",
             "bio": "to do",
-            "contacts": "to do"
+            "contacts_additional": "to do"
+        }
+    },
+
+    {
+        "pk": 1,
+        "model": "hello.contacts",
+        "fields": {
+            "data": 1,
+            "contact_type": "email",
+            "value": "kolyaflash@gmail.com"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "hello.contacts",
+        "fields": {
+            "data": 1,
+            "contact_type": "skype",
+            "value": "kolyaflash"
         }
     }
 ]
