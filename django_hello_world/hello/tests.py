@@ -64,3 +64,11 @@ class CommonTest(TestCase):
         response = self.client.get(reverse('requests'))
         self.assertTrue('requests' in response.context)
         self.assertEqual(len(response.context['requests']), 1)
+
+    def test_context(self):
+        from django.conf import settings
+        response = self.client.get(reverse('home'))
+        self.assertTrue('django_settings' in response.context)
+        context_settings = response.context['django_settings']
+        self.assertEqual(context_settings.ROOT_URLCONF, settings.ROOT_URLCONF)
+        self.assertFalse(hasattr(context_settings, 'SECRET_KEY'))
