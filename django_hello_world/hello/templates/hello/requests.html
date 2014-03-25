@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Requests{% endblock %}
+
+{% block content %}
+    <h3>Requests log</h3>
+
+    <table class="table">
+        <thead>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Date</th>
+            <th>Auth user</th>
+        </thead>
+        <tbody>
+            {% for log in requests %}
+            <tr>
+                <td>{{ log.method }}</td>
+                <td>{{ log.path }}</td>
+                <td>{{ log.date }}</td>
+                <td>{{ log.user|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div>
+        <a href="{% url home %}" class="btn btn-link">Go back</a>
+    </div>
+{% endblock content %}
