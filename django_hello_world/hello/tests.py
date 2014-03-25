@@ -27,6 +27,12 @@ class HttpTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Hello!')
 
+    def test_requests(self):
+        c = Client()
+        response = c.get(reverse('requests'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Requests')
+
 
 class CommonTest(TestCase):
     fixtures = ['initial_data.json',]
@@ -47,3 +53,7 @@ class CommonTest(TestCase):
         from django_hello_world.hello.models import RequestLog
         response = self.client.get(reverse('home'))
         self.assertEqual(RequestLog.objects.all().count(), 1)
+
+    def test_request_page(self):
+        response = self.client.get(reverse('requests'))
+        self.assertTrue('requests' in response.context)
