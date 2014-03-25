@@ -42,3 +42,8 @@ class CommonTest(TestCase):
         self.assertContains(response, profile.first_name)
         self.assertContains(response,
             profile.contacts_set.get(contact_type='email').value)
+
+    def test_requests_logging(self):
+        from django_hello_world.hello.models import RequestLog
+        response = self.client.get(reverse('home'))
+        self.assertEqual(RequestLog.objects.all().count(), 1)
