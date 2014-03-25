@@ -102,6 +102,12 @@ MIDDLEWARE_CLASSES = (
     'django_hello_world.hello.middleware.RequestsLoggingMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django_hello_world.hello.context_processors.django_settings',
+)
+
+
 ROOT_URLCONF = 'django_hello_world.urls'
 
 TEMPLATE_DIRS = (
