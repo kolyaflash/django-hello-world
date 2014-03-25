@@ -35,12 +35,12 @@ class RequestLog(models.Model):
         Pass `_request` as kwarg for fill objects with data.
         `_request` should be request instance.
         """
-
         request = kwargs.pop("_request", None)
+
+        super(RequestLog, self).__init__(*args, **kwargs)
+
         if request:
             if isinstance(request.user, User):
                 self.user = request.user
             self.path = request.get_full_path()
             self.method = request.method
-
-        super(RequestLog, self).__init__(*args, **kwargs)
