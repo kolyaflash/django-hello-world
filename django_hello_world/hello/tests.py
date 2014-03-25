@@ -35,7 +35,7 @@ class HttpTest(TestCase):
 
 
 class CommonTest(TestCase):
-    fixtures = ['initial_data.json',]
+    fixtures = ['initial_data.json', ]
 
     def test_home_page(self):
         from django_hello_world.hello.models import MyData
@@ -47,11 +47,12 @@ class CommonTest(TestCase):
         self.assertTrue(isinstance(profile, MyData))
         self.assertContains(response, profile.first_name)
         self.assertContains(response,
-            profile.contacts_set.get(contact_type='email').value)
+                            profile.contacts_set.get(
+                                contact_type='email').value)
 
     def test_requests_logging(self):
         from django_hello_world.hello.models import RequestLog
-        response = self.client.get(reverse('home'))
+        self.client.get(reverse('home'))
         self.assertEqual(RequestLog.objects.all().count(), 1)
         log = RequestLog.objects.all()[0]
         self.assertEqual(log.method, 'GET')
