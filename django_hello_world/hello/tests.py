@@ -41,7 +41,7 @@ class CommonTest(TestCase):
         from django_hello_world.hello.models import MyData
 
         response = self.client.get(reverse('home'))
-        # profile = response.context["profile"]
+        profile = response.context["profile"]
         self.assertTrue('profile' in response.context)
         profile = response.context['profile']
         self.assertTrue(isinstance(profile, MyData))
@@ -53,7 +53,13 @@ class CommonTest(TestCase):
         from django_hello_world.hello.models import RequestLog
         response = self.client.get(reverse('home'))
         self.assertEqual(RequestLog.objects.all().count(), 1)
+        log = RequestLog.objects.all()[0]
+        self.assertEqual(log.method, 'GET')
+        self.assertEqual(log.path, reverse('home'))
+        self.assertIsNotNone(log.date)
+        self.assertIsNone(log.user)
 
     def test_request_page(self):
         response = self.client.get(reverse('requests'))
         self.assertTrue('requests' in response.context)
+        self.assertEqual(len(response.context['requests']), 1)
