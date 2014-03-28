@@ -27,6 +27,15 @@ class HttpTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Hello!')
 
+    def test_home_edit(self):
+        # Get request protected
+        response = self.client.get(reverse('home_pages:edit'))
+        self.assertEqual(response.status_code, 302)
+
+        # Get request protected
+        response = self.client.post(reverse('home_pages:edit'))
+        self.assertEqual(response.status_code, 302)
+
     def test_requests(self):
         c = Client()
         response = c.get(reverse('requests'))
@@ -72,3 +81,26 @@ class CommonTest(TestCase):
         context_settings = response.context['django_settings']
         self.assertEqual(context_settings.ROOT_URLCONF, settings.ROOT_URLCONF)
         self.assertFalse(hasattr(context_settings, 'SECRET_KEY'))
+
+    def test_home_edit(self):
+        response = self.client.get(reverse('home_pages:edit'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain, [
+                         ('http://testserver/accounts/login/?next=/home/edit/',
+                          302)])
+
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+        response = self.client.get(reverse('home_pages:edit'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+
+        form = response.context['form']
+        test_data = form.initial
+
+        response = self.client.post(reverse('home_pages:edit'), test_data)
+        self.assertTrue(response.context['form'].is_valid())
+
+        response = self.client.post(reverse('home_pages:edit'),
+                                    dict(test_data, **{"email": ""}))
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertTrue("email" in response.context['form'].errors)
