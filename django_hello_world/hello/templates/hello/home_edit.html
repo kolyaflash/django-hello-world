@@ -1,38 +1,17 @@
 {% extends "base.html" %}
-{% load form_tags %}
-{% load static %}
 
 {% block title %}Edit home page{% endblock %}
 
 {% block content %}
     <h3>Hello! On this page you can edit data presented on the main page.</h3>
-    <form method="POST" action="." enctype="multipart/form-data">
+    <form method="POST" action="." enctype="multipart/form-data" class="ajax-form">
         {% csrf_token %}
-        {{ form.errors }}
-        <div class="row">
-            <div class="col-md-6">
-                {% render_field form.first_name %}
-                {% render_field form.last_name %}
-                {% render_field form.birth_date %}
 
-                <div class="photo-input-wrapper">
-                    {% if form.instance.photo %}
-                        <img src="{% static form.instance.photo.url %}" width="400" class="img-responsive" />
-                    {% endif %}
-                    <p>
-                        {{ form.photo }}
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-6">
-                {% render_field form.email %}
-                {% render_field form.skype %}
-                {% render_field form.JID %}
-                {% render_field form.contacts_additional %}
-                {% render_field form.bio %}
-            </div>
-        </div>
-        <button class="btn btn-success">Save form</button>
+        {% include "hello/_home_fieldset.html" %}
+
+        <div class="form-state"></div>
+
+        <button class="btn btn-success" type="submit">Save form</button>
     </form>
 
     <div>
@@ -43,4 +22,14 @@
 {% block js %}
     {{ block.super }}
     {{ form.media }}
+    <script src="http://malsup.github.com/jquery.form.js"></script>
+    <script type="text/javascript">
+        jQuery('.ajax-form').on("submit", function (e) {
+            var options = {
+                target: jQuery("fieldset", jQuery(this)),
+            };
+            jQuery(this).ajaxSubmit(options);
+            return false;
+        });
+    </script>
 {% endblock %}

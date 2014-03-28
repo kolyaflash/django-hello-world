@@ -1,0 +1,28 @@
+{% load form_tags %}
+{% load static %}
+
+<fieldset>
+    <div class="row">
+        <div class="col-md-6">
+            {% render_field form.first_name %}
+            {% render_field form.last_name %}
+            {% render_field form.birth_date %}
+
+            <div class="photo-input-wrapper">
+                {% if form.instance.photo %}
+                    <img src="{% static form.instance.photo.url %}" width="400" class="img-responsive" />
+                {% endif %}
+                <p>
+                    {{ form.photo }}
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            {% render_field form.email %}
+            {% render_field form.skype %}
+            {% render_field form.JID %}
+            {% render_field form.contacts_additional %}
+            {% render_field form.bio %}
+        </div>
+    </div>
+</fieldset>
