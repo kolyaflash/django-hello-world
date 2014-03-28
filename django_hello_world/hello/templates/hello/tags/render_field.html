@@ -1,0 +1,23 @@
+{% load form_tags %}
+
+<div class="form-group">
+    <label for="{{ field.id }}">
+        {% if field.field.required %}<span style="color:red;">* </span>{%endif%}
+        <span class="flabel">{{ field.label|safe }}</span>
+    </label>
+    {% if field.help_text %}
+        <span class="help-text">
+            {{ field.errors.as_text }}
+        </span>
+    {% endif %}
+
+    {{ field|add_class:"form-control" }}
+
+    {% if field.help_text %}
+        <p class="help-block">{{ field.help_text }}</p>
+    {% endif %}
+
+    {% if field.errors %}
+        <p class="help-block">{{ field.errors.as_text }}</p>
+    {% endif %}
+</div>
