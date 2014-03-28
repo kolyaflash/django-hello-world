@@ -8,6 +8,7 @@ class MyData(models.Model):
     birth_date = models.DateField()
     bio = models.TextField(blank=True)
     contacts_additional = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='my_photos/', null=True, blank=True)
 
 
 class Contacts(models.Model):

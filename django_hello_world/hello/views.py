@@ -40,7 +40,7 @@ def home_edit(request):
     form = ProfileForm(instance=mydata, initial=contacts_initial)
 
     if request.method == "POST":
-        form = ProfileForm(request.POST, instance=mydata)
+        form = ProfileForm(request.POST, request.FILES, instance=mydata)
         if form.is_valid():
             form.save()
             for contact_type in Contacts.CONTACT_TYPES:

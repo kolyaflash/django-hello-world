@@ -1,17 +1,28 @@
 {% extends "base.html" %}
 {% load form_tags %}
+{% load static %}
 
 {% block title %}Edit home page{% endblock %}
 
 {% block content %}
     <h3>Hello! On this page you can edit data presented on the main page.</h3>
-    <form method="POST" action=".">
+    <form method="POST" action="." enctype="multipart/form-data">
         {% csrf_token %}
+        {{ form.errors }}
         <div class="row">
             <div class="col-md-6">
                 {% render_field form.first_name %}
                 {% render_field form.last_name %}
                 {% render_field form.birth_date %}
+
+                <div class="photo-input-wrapper">
+                    {% if form.instance.photo %}
+                        <img src="{% static form.instance.photo.url %}" width="400" class="img-responsive" />
+                    {% endif %}
+                    <p>
+                        {{ form.photo }}
+                    </p>
+                </div>
             </div>
             <div class="col-md-6">
                 {% render_field form.email %}
