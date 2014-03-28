@@ -10,6 +10,21 @@ from django.test import TestCase
 from django.test.client import Client
 from django.conf import settings
 from django_hello_world.hello.models import MyData
+from django.core.management import call_command
+
+import sys
+from cStringIO import StringIO
+from contextlib import contextmanager
+
+
+@contextmanager
+def capture_out(command, *args, **kwargs):
+    out, sys.stdout = sys.stdout, StringIO()
+    _out, sys.stderr = sys.stderr, StringIO()
+    command(*args, **kwargs)
+    sys.stdout.seek(0)
+    yield sys.stdout.read()
+    sys.stdout = out
 
 
 class SimpleTest(TestCase):
@@ -43,6 +58,14 @@ class HttpTest(TestCase):
         response = c.get(reverse('requests'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Requests')
+
+
+class CommandsTest(TestCase):
+
+    def test_models_stat(self):
+        with capture_out(call_command, 'modelstat') as stat_output:
+            self.assertTrue('MyData\t%d' %
+                            MyData.objects.count() in stat_output)
 
 
 class CommonTest(TestCase):
