@@ -155,3 +155,24 @@ class CommonTest(TestCase):
                                     HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertContains(response, "fieldset")
         self.assertNotContains(response, "</body>")
+
+    def test_admin_url_templ_tag(self):
+        from django.contrib.auth.models import User
+        from django.template import Template, Context
+        mydata = MyData.objects.get(id=1)
+
+        def get_out(test_obj):
+            out = Template(
+                "{% load admin_url %}"
+                "{% admin_url test_obj %}"
+            ).render(Context({"test_obj": test_obj}))
+            return out
+
+        test_obj = User.objects.get(id=1)
+        excepted_result = "/admin/auth/user/1/"
+        self.assertEqual(get_out(test_obj), excepted_result)
+
+        with self.assertRaises(TypeError):
+            get_out("JustAString")
+
+        self.assertEqual(get_out(mydata), 'None')
