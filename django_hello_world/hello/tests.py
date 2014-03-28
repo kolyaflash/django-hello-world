@@ -8,6 +8,8 @@ Replace this with more appropriate tests for your application.
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.conf import settings
+from django_hello_world.hello.models import MyData
 
 
 class SimpleTest(TestCase):
@@ -27,6 +29,15 @@ class HttpTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Hello!')
 
+    def test_home_edit(self):
+        # Get request protected
+        response = self.client.get(reverse('home_pages:edit'))
+        self.assertEqual(response.status_code, 302)
+
+        # Get request protected
+        response = self.client.post(reverse('home_pages:edit'))
+        self.assertEqual(response.status_code, 302)
+
     def test_requests(self):
         c = Client()
         response = c.get(reverse('requests'))
@@ -38,8 +49,6 @@ class CommonTest(TestCase):
     fixtures = ['initial_data.json', ]
 
     def test_home_page(self):
-        from django_hello_world.hello.models import MyData
-
         response = self.client.get(reverse('home'))
         profile = response.context["profile"]
         self.assertTrue('profile' in response.context)
@@ -66,9 +75,62 @@ class CommonTest(TestCase):
         self.assertEqual(len(response.context['requests']), 1)
 
     def test_context(self):
-        from django.conf import settings
         response = self.client.get(reverse('home'))
         self.assertTrue('django_settings' in response.context)
         context_settings = response.context['django_settings']
         self.assertEqual(context_settings.ROOT_URLCONF, settings.ROOT_URLCONF)
         self.assertFalse(hasattr(context_settings, 'SECRET_KEY'))
+
+    def _get_test_form_data(self):
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+        response = self.client.get(reverse('home_pages:edit'))
+        form = response.context['form']
+        test_data = form.initial
+        test_data['photo'] = None
+
+        return test_data
+
+    def test_home_edit(self):
+        response = self.client.get(reverse('home_pages:edit'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain, [
+                         ('http://testserver/accounts/login/?next=/home/edit/',
+                          302)])
+
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+        response = self.client.get(reverse('home_pages:edit'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('form' in response.context)
+
+        form = response.context['form']
+        test_data = self._get_test_form_data()
+
+        response = self.client.post(reverse('home_pages:edit'), test_data)
+        self.assertTrue(response.context['form'].is_valid())
+
+        response = self.client.post(reverse('home_pages:edit'),
+                                    dict(test_data, **{"email": ""}))
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertTrue("email" in response.context['form'].errors)
+
+    def test_home_edit_photo(self):
+        from django.contrib.staticfiles import finders
+        test_data = self._get_test_form_data()
+        file_name = 'avatar.jpg'
+
+        test_file = finders.find(file_name)
+        with open(test_file) as fp:
+            try:
+                response = self.client.post(reverse('home_pages:edit'),
+                                            dict(test_data, **{"photo": fp}))
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.context['form'].is_valid())
+                self.assertContains(response, file_name)
+
+                mydata = MyData.objects.get(id=1)
+                self.assertTrue(mydata.photo)
+            finally:
+                try:
+                    mydata.photo.delete()
+                except:
+                    pass

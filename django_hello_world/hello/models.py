@@ -6,8 +6,9 @@ class MyData(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     birth_date = models.DateField()
-    bio = models.TextField(null=True)
-    contacts_additional = models.TextField(null=True)
+    bio = models.TextField(blank=True)
+    contacts_additional = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='my_photos/', null=True, blank=True)
 
 
 class Contacts(models.Model):
