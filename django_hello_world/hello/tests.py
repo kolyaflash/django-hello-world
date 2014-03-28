@@ -114,7 +114,7 @@ class CommonTest(TestCase):
         self.assertTrue("email" in response.context['form'].errors)
 
     def test_calendar_widget(self):
-        from hello.forms import CalendarWidget
+        from django_hello_world.hello.forms import CalendarWidget
 
         self.assertTrue(self.client.login(username="admin", password="admin"))
         response = self.client.get(reverse('home_pages:edit'))
