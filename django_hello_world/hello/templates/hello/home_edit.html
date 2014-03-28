@@ -39,3 +39,8 @@
         <a href="{% url home %}" class="btn btn-link">Go back</a>
     </div>
 {% endblock content %}
+
+{% block js %}
+    {{ block.super }}
+    {{ form.media }}
+{% endblock %}
