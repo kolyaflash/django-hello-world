@@ -113,6 +113,18 @@ class CommonTest(TestCase):
         self.assertFalse(response.context['form'].is_valid())
         self.assertTrue("email" in response.context['form'].errors)
 
+    def test_calendar_widget(self):
+        from hello.forms import CalendarWidget
+
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+        response = self.client.get(reverse('home_pages:edit'))
+
+        for excepted_str in CalendarWidget.Media.js:
+            self.assertContains(response, excepted_str)
+
+        for excepted_str in CalendarWidget.Media.css['all']:
+            self.assertContains(response, excepted_str)
+
     def test_home_edit_photo(self):
         from django.contrib.staticfiles import finders
         test_data = self._get_test_form_data()
