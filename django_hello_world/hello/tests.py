@@ -116,13 +116,21 @@ class CommonTest(TestCase):
     def test_home_edit_photo(self):
         from django.contrib.staticfiles import finders
         test_data = self._get_test_form_data()
+        file_name = 'avatar.jpg'
 
-        test_file = finders.find('avatar.jpg')
+        test_file = finders.find(file_name)
         with open(test_file) as fp:
-            response = self.client.post(reverse('home_pages:edit'),
-                                        dict(test_data, **{"photo": fp}))
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue(response.context['form'].is_valid())
+            try:
+                response = self.client.post(reverse('home_pages:edit'),
+                                            dict(test_data, **{"photo": fp}))
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.context['form'].is_valid())
+                self.assertContains(response, file_name)
 
-            mydata = MyData.objects.get(id=1)
-            self.assertTrue(mydata.photo)
+                mydata = MyData.objects.get(id=1)
+                self.assertTrue(mydata.photo)
+            finally:
+                try:
+                    mydata.photo.delete()
+                except:
+                    pass
