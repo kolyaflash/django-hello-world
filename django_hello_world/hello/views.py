@@ -25,9 +25,10 @@ def home(request):
 
 
 @login_required
-@render_to('hello/home_edit.html')
+@render_to()
 def home_edit(request):
     context = {}
+    TEMPLATE = 'hello/home_edit.html'
 
     mydata = get_object_or_404(MyData, pk=MY_DATA_ID)
     contacts_initial = {}
@@ -51,7 +52,11 @@ def home_edit(request):
                     contact_type=_type).update(
                         value=form.cleaned_data.get(_type))
 
+    if request.is_ajax():
+        TEMPLATE = 'hello/_home_fieldset.html'
+
     context['form'] = form
+    context['TEMPLATE'] = TEMPLATE
     return context
 
 

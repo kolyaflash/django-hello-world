@@ -113,6 +113,18 @@ class CommonTest(TestCase):
         self.assertFalse(response.context['form'].is_valid())
         self.assertTrue("email" in response.context['form'].errors)
 
+    def test_calendar_widget(self):
+        from hello.forms import CalendarWidget
+
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+        response = self.client.get(reverse('home_pages:edit'))
+
+        for excepted_str in CalendarWidget.Media.js:
+            self.assertContains(response, excepted_str)
+
+        for excepted_str in CalendarWidget.Media.css['all']:
+            self.assertContains(response, excepted_str)
+
     def test_home_edit_photo(self):
         from django.contrib.staticfiles import finders
         test_data = self._get_test_form_data()
@@ -134,3 +146,12 @@ class CommonTest(TestCase):
                     mydata.photo.delete()
                 except:
                     pass
+
+    def test_home_edit_ajax(self):
+        test_data = self._get_test_form_data()
+
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+        response = self.client.post(reverse('home_pages:edit'),
+                                    test_data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertContains(response, "fieldset")
+        self.assertNotContains(response, "</body>")
