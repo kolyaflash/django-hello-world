@@ -1,0 +1,19 @@
+.content {
+    margin-top: 20px;
+}
+.messages {
+    margin: 30px 0;
+}
+
+.table-form {
+    margin: 20px 0;
+}
+
+.table-form td {
+    padding-bottom: 20px;
+}
+
+.table-form tbody th:first-child {
+    vertical-align: top;
+    padding-right: 20px;
+}
