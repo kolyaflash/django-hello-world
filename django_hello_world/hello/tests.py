@@ -102,7 +102,6 @@ class CommonTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue('form' in response.context)
 
-        form = response.context['form']
         test_data = self._get_test_form_data()
 
         response = self.client.post(reverse('home_pages:edit'), test_data)
@@ -152,6 +151,7 @@ class CommonTest(TestCase):
 
         self.assertTrue(self.client.login(username="admin", password="admin"))
         response = self.client.post(reverse('home_pages:edit'),
-                                    test_data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+                                    test_data,
+                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertContains(response, "fieldset")
         self.assertNotContains(response, "</body>")
