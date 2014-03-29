@@ -5,16 +5,16 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
-from django.core.urlresolvers import reverse
-from django.test import TestCase
-from django.test.client import Client
-from django.conf import settings
-from django_hello_world.hello.models import MyData
-from django.core.management import call_command
-
 import sys
 from cStringIO import StringIO
 from contextlib import contextmanager
+from django.core.urlresolvers import reverse
+from django.core.management import call_command
+from django.conf import settings
+from django.test import TestCase
+from django.test.client import Client
+from django.test.utils import override_settings
+from django_hello_world.hello.models import MyData
 
 
 @contextmanager
@@ -199,3 +199,51 @@ class CommonTest(TestCase):
             get_out("JustAString")
 
         self.assertEqual(get_out(mydata), 'None')
+
+    def test_logging_models(self):
+        from django_hello_world.hello.models import ModelActionLog
+        from django.conf import settings
+
+        # Test create log
+
+        with self.assertRaises(ModelActionLog.DoesNotExist):
+            ModelActionLog.objects.get(instance_id=9999, model_name="MyData")
+
+        test_my_data = {
+            "id": 9999,
+            "first_name": "Unit",
+            "last_name": "Test",
+            "birth_date": "2014-03-29",
+        }
+
+        test_obj = MyData(**test_my_data)
+        test_obj.save()
+
+        test_obj_log = ModelActionLog.objects.get(
+            instance_id=9999, model_name="MyData")
+        self.assertEqual(test_obj_log.action, "CREATE")
+        self.assertTrue(test_obj_log.datetime)
+
+        # Test update log
+        test_obj.first_name = "Super"
+        test_obj.save()
+
+        test_obj_log = ModelActionLog.objects.get(
+            instance_id=9999, model_name="MyData", action="UPDATE")
+
+        # Test delete log
+        test_obj.delete()
+        ModelActionLog.objects.get(
+            instance_id=9999, model_name="MyData", action="DELETE")
+
+    @override_settings(APPS_TO_LOG_DB_CHANGES=[])
+    def test_logging_models_ingore(self):
+        from django_hello_world.hello.models import ModelActionLog
+        prev_count = ModelActionLog.objects.count()
+
+        mydata = MyData.objects.all()[0]
+        mydata.first_name = "test"
+        mydata.save()
+
+        # No update record
+        self.assertEqual(prev_count, ModelActionLog.objects.count())
