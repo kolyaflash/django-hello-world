@@ -141,6 +141,9 @@ INSTALLED_APPS = (
     'south',
 )
 
+# List of app labels that are need to store their models changes history.
+APPS_TO_LOG_DB_CHANGES = ['hello', 'auth', ]
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.
