@@ -126,6 +126,7 @@ class CommonTest(TestCase):
         self.assertTrue('form' in response.context)
 
         test_data = self._get_test_form_data()
+        self.assertTrue('email' in test_data)
 
         # Saves valid data
         response = self.client.post(reverse('home_pages:edit'), test_data)
