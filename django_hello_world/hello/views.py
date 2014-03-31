@@ -33,24 +33,12 @@ def home_edit(request):
     mydata = get_object_or_404(MyData, pk=MY_DATA_ID)
     contacts_initial = {}
 
-    for contact_type in Contacts.CONTACT_TYPES:
-        contact, created = mydata.contacts_set.get_or_create(
-            contact_type=contact_type[0])
-        contacts_initial[contact_type[0]] = contact.value
-
-    form = ProfileForm(instance=mydata, initial=contacts_initial)
+    form = ProfileForm(instance=mydata)
 
     if request.method == "POST":
         form = ProfileForm(request.POST, request.FILES, instance=mydata)
         if form.is_valid():
             form.save()
-            for contact_type in Contacts.CONTACT_TYPES:
-                _type = contact_type[0]
-                if not _type in form.cleaned_data:
-                    continue
-                mydata.contacts_set.filter(
-                    contact_type=_type).update(
-                        value=form.cleaned_data.get(_type))
 
     if request.is_ajax():
         TEMPLATE = 'hello/_home_fieldset.html'

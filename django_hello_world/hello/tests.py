@@ -126,14 +126,26 @@ class CommonTest(TestCase):
         self.assertTrue('form' in response.context)
 
         test_data = self._get_test_form_data()
+        self.assertTrue('email' in test_data)
 
+        # Saves valid data
         response = self.client.post(reverse('home_pages:edit'), test_data)
         self.assertTrue(response.context['form'].is_valid())
 
+        # Form contains errors
         response = self.client.post(reverse('home_pages:edit'),
                                     dict(test_data, **{"email": ""}))
         self.assertFalse(response.context['form'].is_valid())
         self.assertTrue("email" in response.context['form'].errors)
+
+        # Valid changes in form
+        response = self.client.post(reverse('home_pages:edit'),
+                                    dict(test_data,
+                                         **{"email": "valid@email.com"}))
+        self.assertTrue(response.context['form'].is_valid())
+        mydata = MyData.objects.get(id=1)
+        self.assertEqual(mydata.contacts_set.get(
+            contact_type="email").value, "valid@email.com")
 
     def test_calendar_widget(self):
         from django_hello_world.hello.forms import CalendarWidget
