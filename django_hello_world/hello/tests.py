@@ -137,6 +137,7 @@ class CommonTest(TestCase):
                                     dict(test_data, **{"email": ""}))
         self.assertFalse(response.context['form'].is_valid())
         self.assertTrue("email" in response.context['form'].errors)
+        self.assertContains(response, 'has-errors')
 
         # Valid changes in form
         response = self.client.post(reverse('home_pages:edit'),

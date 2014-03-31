@@ -1,7 +1,7 @@
 {% load form_tags %}
 {% load static %}
 
-<fieldset>
+<fieldset class="{% if form.errors %}has-errors{% endif %}">
     <div class="row">
         <div class="col-md-6">
             {% render_field form.first_name %}
