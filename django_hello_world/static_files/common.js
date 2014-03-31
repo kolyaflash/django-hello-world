@@ -20,11 +20,16 @@ function ajaxForm(formSelector) {
                 stateHolder.text("Submiting...");
             },
             success: function (responseText, statusText, xhr, $form) {
-                stateHolder.text("Changes saved!");
+                if (jQuery("fieldset.has-errors", $form).length > 0) {
+                    stateHolder.text("Form contains errors.");
+                } else {
+                    stateHolder.text("Changes saved!");
+                }
+
                 jQuery("fieldset", $form).prop("disabled", false);
             },
             error: function (responseText, statusText, xhr, $form) {
-                stateHolder.text("Changes not saved!");
+                stateHolder.text("Changes was not saved!");
                 jQuery("fieldset", $form).prop("disabled", false);
             },
         };
