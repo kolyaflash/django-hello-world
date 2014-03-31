@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.dispatch import receiver
+from django.conf import settings
 
 
 class MyData(models.Model):
@@ -45,3 +47,50 @@ class RequestLog(models.Model):
                 self.user = request.user
             self.path = request.get_full_path()
             self.method = request.method
+
+
+class ModelActionLog(models.Model):
+    ACTIONS = (
+        ('CREATE', 'Created'),
+        ('UPDATE', 'Updated'),
+        ('DELETE', 'Deleted'),
+    )
+    action = models.CharField(
+        max_length=20, null=False, default=None, choices=ACTIONS)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+    model_name = models.CharField(max_length=128)
+    instance_id = models.CharField(max_length=128)
+
+
+@receiver(models.signals.post_save)
+@receiver(models.signals.post_delete)
+def log_models(sender, **kwargs):
+    INGORED_SENDERS = [ModelActionLog, ]
+    app_labels_whitelist = getattr(settings, "APPS_TO_LOG_DB_CHANGES", [])
+
+    instance = kwargs.get("instance")
+    model_name = sender.__name__
+
+    if model_name in INGORED_SENDERS or sender in INGORED_SENDERS:
+        return
+
+    if not sender._meta.app_label in app_labels_whitelist:
+        return
+
+    if not 'created' in kwargs:
+        # It's probably a deletion (quacks like a duck)
+        action = "DELETE"
+    elif kwargs['created']:
+        # It's a creation
+        action = "CREATE"
+    else:
+        # It's probably an update
+        action = "UPDATE"
+
+    log = ModelActionLog()
+    log.action = action
+    if instance and hasattr(instance, 'id'):
+        log.instance_id = instance.id
+    log.model_name = model_name
+    log.save()
