@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
+{% load admin_url %}
+
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -38,7 +40,8 @@
 
         <div class="header">
             {% if user.is_authenticated %}
-                Logged in as <strong>{{ user }}</strong> (<a href="{% url logout_url %}">logout</a>)
+                Logged in as <strong><a href="{% admin_url user %}">{{ user }}</a></strong>
+                (<a href="{% url logout_url %}">logout</a>)
             {% endif %}
         </div>
 
