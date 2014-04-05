@@ -24,11 +24,68 @@ class Contacts(models.Model):
     value = models.CharField(max_length=100)
 
 
+class PriorityDefaultManager(models.Manager):
+
+    def get_query_set(self):
+        return super(PriorityDefaultManager, self).get_query_set().filter(
+            priority=PriorityRule.PRIOR_DEFAULT)
+
+
+class PriorityHighManager(models.Manager):
+
+    def get_query_set(self):
+        return super(PriorityHighManager, self).get_query_set().filter(
+            priority=PriorityRule.PRIOR_HIGH)
+
+
+class PriorityRule(models.Model):
+    ALLOWED_METHODS = (
+        ('GET', 'GET'),
+        ('POST', 'POST'),
+    )
+
+    PRIOR_DEFAULT = 0
+    PRIOR_HIGH = 1
+
+    PRIORITIES = (
+        (PRIOR_DEFAULT, "Default"),
+        (PRIOR_HIGH, "High"),
+    )
+
+    priority = models.IntegerField(default=PRIOR_DEFAULT, choices=PRIORITIES)
+    method = models.CharField(max_length=10, choices=ALLOWED_METHODS)
+    path = models.CharField(max_length=500)
+
+    class Meta:
+        unique_together = (("method", "path"), )
+
+    def __str__(self):
+        return "%s to %s (%s)" % (self.method, self.path, self.get_priority_display())
+
+    def apply_to_existed(self):
+        lookup_params = {}
+        if self.method:
+            lookup_params['method'] = self.method
+        if self.path:
+            lookup_params['path'] = self.path
+
+        if lookup_params:
+            RequestLog.objects.filter(
+                **lookup_params).update(priority=self.priority)
+
+
 class RequestLog(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    priority = models.IntegerField(
+        default=PriorityRule.PRIOR_DEFAULT,
+        choices=PriorityRule.PRIORITIES)
     date = models.DateTimeField(auto_now_add=True)
     path = models.CharField(max_length=500)
     method = models.CharField(max_length=10)
+
+    objects = models.Manager()
+    default_priority = PriorityDefaultManager()
+    high_priority = PriorityHighManager()
 
     class Meta:
         ordering = ['-date']
@@ -47,6 +104,23 @@ class RequestLog(models.Model):
                 self.user = request.user
             self.path = request.get_full_path()
             self.method = request.method
+            self.detect_priority(auto_set_priority=True)
+
+    def detect_priority(self, auto_set_priority=True):
+        """
+        With this method you can get and/or set priority for this
+        request. It will try to find prioritize rule for this kind of requests
+        based on such attributes as path and method. When there is no any rule
+        the priority will be set to default.
+        """
+        try:
+            rule = PriorityRule.objects.get(path=self.path, method=self.method)
+        except PriorityRule.DoesNotExist:
+            return PriorityRule.PRIOR_DEFAULT
+
+        if auto_set_priority:
+            self.priority = rule.priority
+        return rule.priority
 
 
 class ModelActionLog(models.Model):

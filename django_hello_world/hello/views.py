@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from annoying.decorators import render_to
-from .models import MyData, RequestLog, Contacts
+from .models import MyData, RequestLog, Contacts, PriorityRule
 from .forms import ProfileForm
 
 
@@ -51,5 +52,21 @@ def home_edit(request):
 @render_to('hello/requests.html')
 def requests(request):
     context = {}
-    context['requests'] = RequestLog.objects.all().order_by('date')[:10]
+    qs = RequestLog.objects.all()
+
+    _priority = request.GET.get("priority", 1)
+    current_priority = ""
+
+    try:
+        filter_val = int(_priority)
+    except ValueError:
+        pass
+    else:
+        current_priority = filter_val
+        qs = qs.filter(priority=filter_val)
+
+    context['requests'] = qs.order_by('date')[:10]
+    context['priorities'] = PriorityRule.PRIORITIES
+    context['current_priority'] = current_priority
+
     return context
