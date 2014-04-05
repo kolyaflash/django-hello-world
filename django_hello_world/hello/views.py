@@ -60,8 +60,8 @@ def requests(request):
     try:
         filter_val = int(_priority)
     except ValueError:
-        filter_val = None
-    if filter_val is not None:
+        pass
+    else:
         current_priority = filter_val
         qs = qs.filter(priority=filter_val)
 

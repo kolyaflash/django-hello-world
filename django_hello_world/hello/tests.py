@@ -93,7 +93,7 @@ class CommonTest(TestCase):
         self.assertIsNone(log.user)
 
     def test_request_page(self):
-        response = self.client.get(reverse('requests'))
+        response = self.client.get(reverse('requests') + '?priority=')
         self.assertTrue('requests' in response.context)
         self.assertEqual(len(response.context['requests']), 1)
 
