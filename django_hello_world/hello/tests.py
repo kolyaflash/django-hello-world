@@ -324,3 +324,54 @@ class RequestsTest(TestCase):
         self.assertTrue(
             RequestLog.high_priority.filter(path="/")
         )
+
+    def test_prior_all_post(self):
+        rule1 = PriorityRule(
+            method="POST",
+            priority=PriorityRule.PRIOR_HIGH)
+        rule1.save()
+        rule1.apply_to_existed()
+        self.assertEqual(list(RequestLog.high_priority.all().order_by('id')),
+                         [self.log4, self.log5])
+
+    def test_requests_page(self):
+        resp = self.client.get(reverse("requests"))
+        self.assertEqual(resp.status_code, 200)
+
+        rule1 = PriorityRule(
+            method="GET",
+            priority=PriorityRule.PRIOR_HIGH)
+        rule1.save()
+        rule1.apply_to_existed()
+
+        # Show only high priority
+
+        resp = self.client.get(reverse("requests") + '?priority=1')
+        self.assertEqual(resp.status_code, 200)
+
+        real = sorted(resp.context['requests'].values_list('id', flat=True))
+        expected = sorted(
+            RequestLog.high_priority.all()[:10].values_list('id', flat=True))
+
+        self.assertEqual(real, expected)
+
+        # Show only default priority
+
+        resp = self.client.get(reverse("requests") + '?priority=0')
+        self.assertEqual(resp.status_code, 200)
+
+        real = sorted(resp.context['requests'].values_list('id', flat=True))
+        expected = sorted(
+            RequestLog.default_priority.all()[:10].values_list('id', flat=True))
+
+        self.assertEqual(real, expected)
+
+        # Show all priority
+        resp = self.client.get(reverse("requests") + '?priority=')
+        self.assertEqual(resp.status_code, 200)
+
+        real = sorted(resp.context['requests'].values_list('id', flat=True))
+        expected = sorted(
+            RequestLog.objects.all()[:10].values_list('id', flat=True))
+
+        self.assertEqual(real, expected)
