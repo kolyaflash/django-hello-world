@@ -37,3 +37,8 @@ function ajaxForm(formSelector) {
         return false;
     });
 }
+
+
+jQuery("select#requests_priority").on("change", function (e) {
+    jQuery(this).parents("form").submit();
+});
