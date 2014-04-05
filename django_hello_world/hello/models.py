@@ -59,6 +59,9 @@ class PriorityRule(models.Model):
     class Meta:
         unique_together = (("method", "path"), )
 
+    def __str__(self):
+        return "%s to %s (%s)" % (self.method, self.path, self.get_priority_display())
+
     def apply_to_existed(self):
         lookup_params = {}
         if self.method:
@@ -73,7 +76,9 @@ class PriorityRule(models.Model):
 
 class RequestLog(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    priority = models.IntegerField(default=PriorityRule.PRIOR_DEFAULT)
+    priority = models.IntegerField(
+        default=PriorityRule.PRIOR_DEFAULT,
+        choices=PriorityRule.PRIORITIES)
     date = models.DateTimeField(auto_now_add=True)
     path = models.CharField(max_length=500)
     method = models.CharField(max_length=10)
