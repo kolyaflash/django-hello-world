@@ -12,7 +12,6 @@ from django.core.urlresolvers import reverse
 from django.core.management import call_command
 from django.conf import settings
 from django.test import TestCase
-from django.test.client import Client
 from django.test.utils import override_settings
 from django_hello_world.hello.models import MyData
 from django_hello_world.hello.models import RequestLog, PriorityRule
@@ -40,8 +39,7 @@ class SimpleTest(TestCase):
 class HttpTest(TestCase):
 
     def test_home(self):
-        c = Client()
-        response = c.get(reverse('home'))
+        response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Hello!')
 
@@ -55,8 +53,7 @@ class HttpTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_requests(self):
-        c = Client()
-        response = c.get(reverse('requests'))
+        response = self.client.get(reverse('requests'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Requests')
 
