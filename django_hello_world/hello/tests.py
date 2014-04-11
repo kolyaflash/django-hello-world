@@ -372,3 +372,21 @@ class RequestsTest(TestCase):
             RequestLog.objects.all()[:10].values_list('id', flat=True))
 
         self.assertEqual(real, expected)
+
+    def test_remove_requests(self):
+        remove_url = reverse("request_remove", args=[self.log1.pk])
+        resp = self.client.get(reverse("requests") + '?priority=')
+        self.assertContains(resp, remove_url)
+
+        # Success redirect after non-ajax request
+        resp = self.client.get(remove_url, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.redirect_chain,
+                         [('http://testserver/requests/', 302)])
+
+        # Success ajax request
+        remove_url = reverse("request_remove", args=[self.log2.pk])
+        resp = self.client.post(
+            remove_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'success')
