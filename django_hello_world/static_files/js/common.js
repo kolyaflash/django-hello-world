@@ -1,3 +1,24 @@
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getToken() {
+    return getCookie('csrftoken');
+}
+
+
 function ajaxForm(formSelector) {
     var defaultSelector = ".ajax-form";
     if (!formSelector) {
@@ -41,4 +62,32 @@ function ajaxForm(formSelector) {
 
 jQuery(document).on("change", "select#requests_priority", function (e) {
     jQuery(this).parents("form").submit();
+});
+
+
+jQuery(document).on("click", ".remove-request-button", function (e) {
+    e.preventDefault();
+    var target = e.currentTarget;
+
+    var url = jQuery(this).attr("href");
+
+    jQuery.ajax({
+      url: url,
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        "csrfmiddlewaretoken": getToken(),
+      },
+      success: function(data, textStatus, xhr) {
+        if (data.status == "success") {
+            jQuery(target).parents("tr").fadeOut();
+        } else {
+            alert("Sorry, something went wrong");
+        }
+      },
+      error: function(xhr, textStatus, errorThrown) {
+        alert("Sorry, internal error occured");
+      }
+    });
+
 });
