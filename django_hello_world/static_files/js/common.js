@@ -39,6 +39,6 @@ function ajaxForm(formSelector) {
 }
 
 
-jQuery("select#requests_priority").on("change", function (e) {
+jQuery(document).on("change", "select#requests_priority", function (e) {
     jQuery(this).parents("form").submit();
 });
