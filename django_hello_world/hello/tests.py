@@ -12,7 +12,6 @@ from django.core.urlresolvers import reverse
 from django.core.management import call_command
 from django.conf import settings
 from django.test import TestCase
-from django.test.client import Client
 from django.test.utils import override_settings
 from django_hello_world.hello.models import MyData
 from django_hello_world.hello.models import RequestLog, PriorityRule
@@ -40,8 +39,7 @@ class SimpleTest(TestCase):
 class HttpTest(TestCase):
 
     def test_home(self):
-        c = Client()
-        response = c.get(reverse('home'))
+        response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Hello!')
 
@@ -55,8 +53,7 @@ class HttpTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_requests(self):
-        c = Client()
-        response = c.get(reverse('requests'))
+        response = self.client.get(reverse('requests'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Requests')
 
@@ -375,3 +372,21 @@ class RequestsTest(TestCase):
             RequestLog.objects.all()[:10].values_list('id', flat=True))
 
         self.assertEqual(real, expected)
+
+    def test_remove_requests(self):
+        remove_url = reverse("request_remove", args=[self.log1.pk])
+        resp = self.client.get(reverse("requests") + '?priority=')
+        self.assertContains(resp, remove_url)
+
+        # Success redirect after non-ajax request
+        resp = self.client.get(remove_url, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.redirect_chain,
+                         [('http://testserver/requests/', 302)])
+
+        # Success ajax request
+        remove_url = reverse("request_remove", args=[self.log2.pk])
+        resp = self.client.post(
+            remove_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'success')

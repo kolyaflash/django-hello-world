@@ -7,9 +7,9 @@ class CalendarWidget(forms.DateInput):
 
     class Media:
         css = {
-            'all': ('datepicker/css/datepicker.css', )
+            'all': ('css/datepicker.css', )
         }
-        js = ('datepicker/js/bootstrap-datepicker.js', 'widgets.js')
+        js = ('js/bootstrap-datepicker.js', 'js/widgets.js')
 
     def __init__(self, attrs={}):
 

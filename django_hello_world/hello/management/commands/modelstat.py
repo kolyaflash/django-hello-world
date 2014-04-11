@@ -16,18 +16,16 @@ def _models_iterator():
     """ Gets a list of models and count of objects in them.
     Returns list of tuples (model, objects count).
     """
-    from django.db.models import get_apps
-    from django.db.models import get_models
+    from django.contrib.contenttypes.models import ContentType
+
     EXCLUDED_MODELS = ('ContentType', )
 
-    app_list = get_apps()
+    content_types = ContentType.objects.all()
     models = []
 
-    for app in app_list:
-        # Get all models for each app, except any excluded ones
-        models += [m for m in get_models(
-            app) if m.__name__ not in EXCLUDED_MODELS]
+    for ct in content_types:
+        model = ct.model_class()
+        if model.__name__ in EXCLUDED_MODELS:
+            continue
 
-    for model in models:
-        # For lazy count execute
-        yield (model, model.objects.count())
+        yield (model, model._default_manager.count())

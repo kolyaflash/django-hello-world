@@ -33,6 +33,7 @@
             <th>Date</th>
             <th>Auth user</th>
             <th>Priority</th>
+            <th></th>
         </thead>
         <tbody>
             {% for log in requests %}
@@ -43,6 +44,9 @@
                 <td>{{ log.user|default:"-" }}</td>
                 <td>
                     <span>{{ log.get_priority_display }}</span>
+                </td>
+                <td>
+                    <a class="remove-request-button" href="{% url request_remove log.id %}">Remove</a>
                 </td>
             </tr>
             {% endfor %}

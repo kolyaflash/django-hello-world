@@ -1,8 +1,10 @@
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from annoying.decorators import render_to
+from annoying.decorators import ajax_request
 from .models import MyData, RequestLog, Contacts, PriorityRule
 from .forms import ProfileForm
 
@@ -70,3 +72,14 @@ def requests(request):
     context['current_priority'] = current_priority
 
     return context
+
+
+@ajax_request
+def request_remove_handler(request, log_id):
+    log_obj = get_object_or_404(RequestLog, pk=log_id)
+    log_obj.delete()
+
+    if request.is_ajax():
+        return {"status": "success"}
+    else:
+        return redirect(reverse("requests"))
